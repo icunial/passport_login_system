@@ -4,6 +4,7 @@ const router = express.Router();
 const User = require("../models/User");
 
 const bcrypt = require("bcryptjs");
+const passport = require("passport");
 
 // Get Logged in user
 router.get("/user", (req, res) => {
@@ -80,6 +81,38 @@ router.post("/register", async (req, res, next) => {
       }
     });
   });
+});
+
+// Login Process
+router.post("/login", (req, res, next) => {
+  const { email, password } = req.body;
+  if (!email) {
+    return res.status(400).json({
+      statusCode: 400,
+      msg: `Email is required!`,
+    });
+  }
+
+  if (!password) {
+    return res.status(400).json({
+      statusCode: 400,
+      msg: `Password is required!`,
+    });
+  }
+
+  passport.authenticate("local", (error, user, info) => {
+    if (error) return next(error);
+    if (!user) {
+      return res.status(404).json({
+        statusCode: 404,
+        msg: info.msg,
+      });
+    }
+    req.logIn(user, (error) => {
+      if (error) return next(error);
+      return res.status(200).send(true);
+    });
+  })(req, res, next);
 });
 
 module.exports = router;
