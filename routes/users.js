@@ -54,6 +54,17 @@ router.post("/register", async (req, res, next) => {
         return next(err);
       }
       try {
+        const userFound = await User.findOne({
+          email,
+        });
+        if (userFound) {
+          console.log(userFound);
+          return res.status(400).json({
+            statusCode: 400,
+            msg: `Email address is not available. Try with a new one!`,
+          });
+        }
+
         const userCreated = await User.create({
           email,
           password: hash,
