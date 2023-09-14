@@ -12,6 +12,9 @@ const db = mongoose.connection;
 
 const usersRouter = require("./routes/users");
 
+const session = require("express-session");
+const passport = require("passport");
+
 // Check DB connection
 db.once("open", () => {
   console.log("Connected to MongoDB");
@@ -25,6 +28,20 @@ db.on("error", (error) => {
 // Body-Parser Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+// Express Session Middleware
+app.use(
+  session({
+    secret: `${process.env.SESSION_SECRET}`,
+    resave: false,
+    saveUninitialized: false,
+  })
+);
+
+// Passport Config
+require("./config/passport")(passport);
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Routers
 app.use("/users", usersRouter);
