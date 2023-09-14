@@ -10,6 +10,8 @@ const mongoose = require("mongoose");
 mongoose.connect(`mongodb://${process.env.DB_HOST}/${process.env.DB_NAME}`);
 const db = mongoose.connection;
 
+const usersRouter = require("./routes/users");
+
 // Check DB connection
 db.once("open", () => {
   console.log("Connected to MongoDB");
@@ -20,9 +22,12 @@ db.on("error", (error) => {
   console.log(error);
 });
 
-// Body-Parse Middleware
+// Body-Parser Middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
+
+// Routers
+app.use("/users", usersRouter);
 
 // Error catching endware
 app.use((err, req, res, next) => {
