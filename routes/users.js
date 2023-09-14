@@ -1,6 +1,10 @@
 const express = require("express");
 const router = express.Router();
 
+const User = require("../models/User");
+
+const bcrypt = require("bcryptjs");
+
 // Get Logged in user
 router.get("/user", (req, res) => {
   res.send("User");
@@ -39,6 +43,32 @@ router.post("/register", async (req, res, next) => {
       msg: `Password and Password Confirmation not match!`,
     });
   }
+
+  // Hash Password and Create User
+  bcrypt.getSalt(10, (err, salt) => {
+    if (err) {
+      return next(err);
+    }
+    bcrypt.hash(password, salt, async (err, hash) => {
+      if (err) {
+        return next(err);
+      }
+      try {
+        const userCreated = await User.create({
+          email,
+          password: hash,
+        });
+        if (userCreated) {
+          return res.status(201).json({
+            statusCode: 201,
+            data: userCreated,
+          });
+        }
+      } catch (error) {
+        return next(error);
+      }
+    });
+  });
 });
 
 module.exports = router;
