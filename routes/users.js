@@ -45,7 +45,7 @@ router.post("/register", async (req, res, next) => {
   }
 
   // Hash Password and Create User
-  bcrypt.getSalt(10, (err, salt) => {
+  bcrypt.genSalt(10, (err, salt) => {
     if (err) {
       return next(err);
     }
