@@ -23,6 +23,13 @@ router.get("/user", (req, res) => {
 
 // Register Process
 router.post("/register", async (req, res, next) => {
+  if (req.user) {
+    return res.status(400).json({
+      statusCode: 400,
+      msg: `A user is already logged in!`,
+    });
+  }
+
   const { email, password, password2 } = req.body;
 
   // Validations
@@ -95,6 +102,12 @@ router.post("/register", async (req, res, next) => {
 
 // Login Process
 router.post("/login", (req, res, next) => {
+  if (req.user) {
+    return res.status(400).json({
+      statusCode: 400,
+      msg: `A user is already logged in!`,
+    });
+  }
   const { email, password } = req.body;
   if (!email) {
     return res.status(400).json({
@@ -127,6 +140,12 @@ router.post("/login", (req, res, next) => {
 
 // Logout Process
 router.get("/logout", (req, res, next) => {
+  if (!req.user) {
+    return res.status(400).json({
+      statusCode: 400,
+      msg: `No user logged in`,
+    });
+  }
   req.logout((err) => {
     if (err) return next(err);
     res.status(200).send(false);
