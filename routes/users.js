@@ -2,9 +2,27 @@ const express = require("express");
 const router = express.Router();
 
 const User = require("../models/User");
+const GoogleUser = require("../models/GoogleUser");
+const GithubUser = require("../models/GithubUser");
 
 const bcrypt = require("bcryptjs");
 const passport = require("passport");
+
+// Get All users
+router.get("/all", async (req, res, next) => {
+  try {
+    const localUsers = await User.find().select("_id email");
+    const googleUsers = await GoogleUser.find().select("_id email");
+    const githubUsers = await GithubUser.find().select("_id email");
+
+    res.status(200).json({
+      statusCode: 200,
+      data: localUsers.concat(googleUsers).concat(githubUsers),
+    });
+  } catch (error) {
+    return next(error);
+  }
+});
 
 // Google Authentication
 router.get(
