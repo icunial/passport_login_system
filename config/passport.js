@@ -1,9 +1,11 @@
 const LocalStrategy = require("passport-local").Strategy;
 const User = require("../models/User");
 const GoogleUser = require("../models/GoogleUser");
+const GithubUser = require("../models/GithubUser");
 const bcrypt = require("bcryptjs");
 
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
+const GithubStrategy = require("passport-github2").Strategy;
 
 require("dotenv").config();
 
@@ -38,7 +40,7 @@ module.exports = (passport) => {
     )
   );
 
-  //Google Strategy
+  // Google Strategy
   passport.use(
     new GoogleStrategy(
       {
@@ -68,6 +70,37 @@ module.exports = (passport) => {
     )
   );
 
+  // Github Strategy
+  passport.use(
+    new GithubStrategy(
+      {
+        clientID: process.env.GITHUB_CLIENT_ID,
+        clientSecret: process.env.GITHUB_CLIENT_SECRET,
+        scope: ["email"],
+        callbackURL: "/users/github/callback",
+      },
+      async (accessToken, refreshToken, profile, done) => {
+        console.log(profile);
+        try {
+          const userFound = await GithubUser.findOne({ id: profile.id });
+          if (userFound) {
+            done(null, userFound);
+          } else {
+            const userCreated = await GithubUser.create({
+              id: profile.id,
+              email: profile.profileUrl,
+            });
+            if (userCreated) {
+              done(null, userCreated);
+            }
+          }
+        } catch (error) {
+          done(error, null);
+        }
+      }
+    )
+  );
+
   passport.serializeUser((user, done) => {
     done(null, user._id);
   });
@@ -82,7 +115,12 @@ module.exports = (passport) => {
         if (googleUserFound) {
           done(null, googleUserFound);
         } else {
-          done(null, { msg: `User not found!` });
+          const githubUserFound = await GithubUser.findById(id);
+          if (githubUserFound) {
+            done(null, githubUserFound);
+          } else {
+            done(null, { msg: `User not found!` });
+          }
         }
       }
     } catch (error) {
