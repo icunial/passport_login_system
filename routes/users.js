@@ -6,6 +6,26 @@ const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const passport = require("passport");
 
+// Google Authentication
+router.get(
+  "/google",
+  passport.authenticate("google", { scope: ["profile", "email"] })
+);
+
+// Google Callback
+router.get(
+  "/google/callback",
+  passport.authenticate("google"),
+  (req, res, next) => {
+    if (req.user) {
+      return res.status(200).json({
+        statusCode: 200,
+        data: req.user,
+      });
+    }
+  }
+);
+
 // Get Logged in user
 router.get("/user", (req, res) => {
   if (req.user) {
