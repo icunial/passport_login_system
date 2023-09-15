@@ -88,7 +88,7 @@ module.exports = (passport) => {
           } else {
             const userCreated = await GithubUser.create({
               id: profile.id,
-              email: profile.profileUrl,
+              email: profile.email,
             });
             if (userCreated) {
               done(null, userCreated);
