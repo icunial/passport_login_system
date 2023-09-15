@@ -10,10 +10,6 @@ const googleUserSchema = mongoose.Schema({
     type: String,
     required: true,
   },
-  password: {
-    type: String,
-    required: true,
-  },
 });
 
 const GoogleUser = (module.exports = mongoose.model(
