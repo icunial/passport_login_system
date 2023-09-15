@@ -17,6 +17,6 @@ const googleUserSchema = mongoose.Schema({
 });
 
 const GoogleUser = (module.exports = mongoose.model(
-  "GoogleUSer",
-  googleUserSchemaSchema
+  "GoogleUser",
+  googleUserSchema
 ));
