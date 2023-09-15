@@ -1,5 +1,6 @@
 const LocalStrategy = require("passport-local").Strategy;
 const User = require("../models/User");
+const GoogleUser = require("../models/GoogleUser");
 const bcrypt = require("bcryptjs");
 
 const GoogleStrategy = require("passport-google-oauth20").Strategy;
@@ -46,7 +47,23 @@ module.exports = (passport) => {
         callbackURL: "/users/google/callback",
       },
       async (accessToken, refreshToken, profile, done) => {
-        console.log(profile);
+        try {
+          const userFound = await GoogleUser.findOne({ id: profile.id });
+
+          if (userFound) {
+            done(null, userFound);
+          } else {
+            const userCreated = await GoogleUser.create({
+              id: profile.id,
+              email: profile.emails[0].value,
+            });
+            if (userCreated) {
+              done(null, userCreated);
+            }
+          }
+        } catch (error) {
+          done(error, null);
+        }
       }
     )
   );
@@ -61,7 +78,12 @@ module.exports = (passport) => {
       if (userFound) {
         done(null, userFound);
       } else {
-        done(null, { msg: `User not found!` });
+        const googleUserFound = await GoogleUser.findById(id);
+        if (googleUserFound) {
+          done(null, googleUserFound);
+        } else {
+          done(null, { msg: `User not found!` });
+        }
       }
     } catch (error) {
       done(error, null);
