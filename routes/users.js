@@ -26,6 +26,26 @@ router.get(
   }
 );
 
+// Github Authentication
+router.get(
+  "/github",
+  passport.authenticate("github", { scope: ["user:email"] })
+);
+
+// Github Callback
+router.get(
+  "/github/callback",
+  passport.authenticate("github"),
+  (req, res, next) => {
+    if (req.user) {
+      return res.status(200).json({
+        statusCode: 200,
+        data: req.user,
+      });
+    }
+  }
+);
+
 // Get Logged in user
 router.get("/user", (req, res) => {
   if (req.user) {
